@@ -11,10 +11,14 @@ const reducer = (state = initialState, action) => {
             users: action.payload
         }
     case ADD_USER:
-      return {
-        ...state,
-        users: [...state.users, action.payload],
+      let id = state.users.findIndex(user => user._id === action.payload._id)
+      if (id === -1) {
+        return {
+          ...state,
+          users: [...state.users, action.payload],
+        }
       }
+      return state
     case REMOVE_USER:
       return {
         ...state,

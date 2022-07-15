@@ -12,20 +12,16 @@ function App(props) {
 
   const dispatch = useDispatch()
 
-  const server = {
-    // url: 'http://
-  }
-
   const handleUserUpdated = (user, type) => {
     if(type === "New"){
       // post new user logic here
-      console.log(user)
       socket.emit("addNew", user)
+   
     }
     else {
       // update logic here
-      console.log(user)
       socket.emit("update", user)
+     
     }
   }
 
@@ -36,17 +32,13 @@ function App(props) {
   }
 
   useEffect(() => {
-
     socket.on("recieve_addNew", (data) => {
-      console.log(data)
       dispatch(addUser(data))
     })
     socket.on("recieve_update", (data) => {
-      console.log(data)
       dispatch(updateUser(data))
     })
     socket.on("deletion_id", (data) => {
-      console.log(data)
       dispatch(removeUser(data))
     })
   }, [socket])
@@ -84,8 +76,6 @@ function App(props) {
         <TableUser
           onUserUpdated={handleUserUpdated}
           onUserDeleted={handleUserDeleted}
-          server={server}
-          socket={socket}
         />
       </Container>
     </div>

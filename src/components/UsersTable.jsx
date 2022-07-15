@@ -1,14 +1,14 @@
+import React from "react"
 import { connect } from "react-redux"
 import { Table } from "semantic-ui-react"
 import AddModal from "./AddModal"
 import DeleteModal from "./DeleteModal"
 
 const TableUser = (props) => {
-
   let users = props.users
 
-  users = users.map((user) => (
-    <Table.Row key={user._id}>
+  users = users.map((user, index) => (
+    <Table.Row key={index}>
       <Table.Cell>{user.fullname}</Table.Cell>
       <Table.Cell>{user.email}</Table.Cell>
       <Table.Cell>{user.age}</Table.Cell>
@@ -21,8 +21,7 @@ const TableUser = (props) => {
           buttonColor="blue"
           userID={user._id}
           onUserUpdated={props.onUserUpdated}
-          server={props.server}
-          socket={props.socket}
+       
         />
         <DeleteModal
           headerTitle="Delete User"
@@ -30,8 +29,6 @@ const TableUser = (props) => {
           buttonColor="black"
           user={user}
           onUserDeleted={props.onUserDeleted}
-          server={props.server}
-          socket={props.socket}
         />
       </Table.Cell>
     </Table.Row>

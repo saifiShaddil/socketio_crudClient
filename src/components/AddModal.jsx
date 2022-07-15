@@ -22,8 +22,6 @@ function AddModal(props) {
           userID={props.userID}
           onUserAdded={props.onUserAdded}
           onUserUpdated={props.onUserUpdated}
-          server={props.server}
-          socket={props.socket}
           setOpen={setOpen}
        />
       </Modal.Content>

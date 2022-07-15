@@ -4,7 +4,6 @@ import { Button, Form, Message, Select } from "semantic-ui-react"
 import { updateUser, addUser } from "../store/actions"
 
 const AddForm = (props) => {
-  const [message, setMessage] = useState({ show: false, text: "", color: 'green', header:"Successfully!" })
   const dispatch = useDispatch()
   const genderOptions = [
     { key: "m", text: "Male", value: "Male" },
@@ -43,16 +42,12 @@ const AddForm = (props) => {
           return res.json()
         })
         .then((result) => {
-          setMessage({...message, show: true, header: "Successfully!", color: 'green', text: "New User Added."})
-         setTimeout(() => {
           props.onUserUpdated(result, "New")
           dispatch(addUser(result))
           props.setOpen(false)
-         }, 1000)
         })
         .catch((err) => {
-          // console.log(err)
-          setMessage({...message, show: true, text: err.message, color: 'red', header:"Error!"})
+          console.log(err)
         })
     }
     if (method === "put") {
@@ -70,15 +65,12 @@ const AddForm = (props) => {
           return res.json()
         })
         .then((result) => {
-          setMessage({...message, show: true, header: "Successfully!", color: 'green', text: "User updated successfully"})
-          setTimeout(() => {
-            props.onUserUpdated(result, "Update")
-            dispatch(updateUser(result))
-            props.setOpen(false)
-          }, 1000)
+          props.onUserUpdated(result, "Update")
+          dispatch(updateUser(result))
+          props.setOpen(false)
         })
         .catch((err) => {
-          setMessage({...message, show: true, text: err.message, color: 'red', header:"Error!"})
+          console.log(err)
         })
 
     }
@@ -145,14 +137,6 @@ const AddForm = (props) => {
         value={gender}
         onChange={handleSelectChange}
       ></Select>
-      { message.show && (
-        <Message
-          success
-          color={message.color}
-          header={message.header}
-          content={message.text}
-        />
-      ) }
       <Button style={{ display: "block", marginTop: '1em'}} color={props.buttonColor}>{props.buttonSubmitTitle}</Button>
     </Form>
   )
