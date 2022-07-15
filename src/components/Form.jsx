@@ -3,8 +3,10 @@ import { connect, useDispatch } from "react-redux"
 import { Button, Form, Message, Select } from "semantic-ui-react"
 import { updateUser, addUser } from "../store/actions"
 
+
 const AddForm = (props) => {
   const dispatch = useDispatch()
+
   const genderOptions = [
     { key: "m", text: "Male", value: "Male" },
     { key: "f", text: "Female", value: "Female" },
