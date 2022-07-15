@@ -1,47 +1,80 @@
-import { useEffect, useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
-import io  from 'socket.io-client'
+import { useEffect, useState } from "react"
+import io from "socket.io-client"
+import { Container } from "semantic-ui-react"
+import HeadContent from "./components/Header"
+import TableUser from "./components/UsersTable"
+import { addUser } from "./store/actions"
+import { useDispatch, connect } from "react-redux"
 
-const socket = io.connect('http://127.0.0.1:4000')
+const socket = io.connect("http://127.0.0.1:4000")
 
-function App() {
-  const [count, setCount] = useState(0)
-  const handleCount = () => {
-    setCount(count + 1)
-    socket.emit('get_count', { count: count + 1})
+function App(props) {
+  const [data, setData] = useState([]) 
+
+  const dispatch = useDispatch()
+
+  const server = {
+    // url: 'http://
   }
 
+  const handleUserUpdated = (user) => {}
+
+  const handleUserDeleted = (id) => {}
+
   useEffect(() => {
-    socket.on('recieve_count', (data) => {
+    socket.on("recieve_count", (data) => {
       console.log(data.count)
+    })
+    socket.on("recieve_addNew", (data) => {
+      console.log(data)
+      setData([...data])
+    })
+    socket.on("recieve_update", (data) => {
+      console.log(data)
     })
   }, [socket])
 
+  useEffect(() => {
+    const controller = new AbortController()
+    fetch(import.meta.env.VITE_APP_BASE_URL + "/users", {
+      signal: controller.signal,
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(res.statusText)
+        }
+        return res.json()
+      })
+      .then((result) => {
+        setData(result)
+        dispatch(addUser(result))
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+
+    return () => controller.abort()
+  }, [])
+
   return (
-    <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => handleCount()}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+    <div style={{ margin: "2em auto" }}>
+      <Container>
+        <HeadContent />
+        <TableUser
+          onUserUpdated={handleUserUpdated}
+          onUserDeleted={handleUserDeleted}
+          users={data}
+          server={server}
+          socket={socket}
+        />
+      </Container>
     </div>
   )
 }
 
-export default App
+const mapStateToProps = (state) => {
+  return {
+    users: state.users,
+  }
+}
+export default connect(mapStateToProps)(App)
