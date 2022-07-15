@@ -24,6 +24,7 @@ function AddModal(props) {
           onUserUpdated={props.onUserUpdated}
           server={props.server}
           socket={props.socket}
+          setOpen={setOpen}
        />
       </Modal.Content>
     </Modal>

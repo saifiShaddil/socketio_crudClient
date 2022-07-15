@@ -3,13 +3,12 @@ import io from "socket.io-client"
 import { Container } from "semantic-ui-react"
 import HeadContent from "./components/Header"
 import TableUser from "./components/UsersTable"
-import { addUser } from "./store/actions"
-import { useDispatch, connect } from "react-redux"
+import { addUser, getUsers, removeUser, updateUser } from "./store/actions"
+import { useDispatch } from "react-redux"
 
 const socket = io.connect("http://127.0.0.1:4000")
 
 function App(props) {
-  const [data, setData] = useState([]) 
 
   const dispatch = useDispatch()
 
@@ -17,27 +16,49 @@ function App(props) {
     // url: 'http://
   }
 
-  const handleUserUpdated = (user) => {}
+  const handleUserUpdated = (user, type) => {
+    if(type === "New"){
+      // post new user logic here
+      console.log(user)
+      socket.emit("addNew", user)
+    }
+    else {
+      // update logic here
+      console.log(user)
+      socket.emit("update", user)
+    }
+  }
 
-  const handleUserDeleted = (id) => {}
+  const handleUserDeleted = (id) => {
+    // delete logic here
+    dispatch(removeUser(id))
+    socket.emit("delete", id)
+  }
 
   useEffect(() => {
-    socket.on("recieve_count", (data) => {
-      console.log(data.count)
-    })
+
     socket.on("recieve_addNew", (data) => {
       console.log(data)
-      setData([...data])
+      dispatch(addUser(data))
     })
     socket.on("recieve_update", (data) => {
       console.log(data)
+      dispatch(updateUser(data))
+    })
+    socket.on("deletion_id", (data) => {
+      console.log(data)
+      dispatch(removeUser(data))
     })
   }, [socket])
 
   useEffect(() => {
     const controller = new AbortController()
     fetch(import.meta.env.VITE_APP_BASE_URL + "/users", {
+      method: "GET",
       signal: controller.signal,
+      headers: {
+        contentType: "application/json"
+      }
     })
       .then((res) => {
         if (!res.ok) {
@@ -46,8 +67,7 @@ function App(props) {
         return res.json()
       })
       .then((result) => {
-        setData(result)
-        dispatch(addUser(result))
+        dispatch(getUsers(result))
       })
       .catch((err) => {
         console.log(err)
@@ -56,6 +76,7 @@ function App(props) {
     return () => controller.abort()
   }, [])
 
+
   return (
     <div style={{ margin: "2em auto" }}>
       <Container>
@@ -63,7 +84,6 @@ function App(props) {
         <TableUser
           onUserUpdated={handleUserUpdated}
           onUserDeleted={handleUserDeleted}
-          users={data}
           server={server}
           socket={socket}
         />
@@ -72,9 +92,4 @@ function App(props) {
   )
 }
 
-const mapStateToProps = (state) => {
-  return {
-    users: state.users,
-  }
-}
-export default connect(mapStateToProps)(App)
+export default App

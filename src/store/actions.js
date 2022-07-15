@@ -15,15 +15,16 @@ export const removeUser = (id) => {
     }
 }
 
-export const updateUser = (id) => {
+export const updateUser = (user) => {
     return {
         type: UPDATE_USER,
-        payload: id,
+        payload: user,
     }
 }
 
-export const getUsers = () => {
+export const getUsers = (users) => {
     return {
         type: GET_USERS,
+        payload: users,
     }
 }

@@ -1,8 +1,10 @@
+import { connect } from "react-redux"
 import { Table } from "semantic-ui-react"
 import AddModal from "./AddModal"
 import DeleteModal from "./DeleteModal"
 
 const TableUser = (props) => {
+
   let users = props.users
 
   users = users.map((user) => (
@@ -49,6 +51,7 @@ const TableUser = (props) => {
         onUserUpdated={props.onUserUpdated}
         server={props.server}
         socket={props.socket}
+        
       />
     </div>
       <Table singleLine>
@@ -69,4 +72,10 @@ const TableUser = (props) => {
   )
 }
 
-export default TableUser
+const mapStateToProps = (state) => {
+  return {
+    users: state.users
+  }
+}
+
+export default connect(mapStateToProps)(TableUser)

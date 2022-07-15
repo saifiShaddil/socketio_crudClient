@@ -6,7 +6,7 @@ const initialState = {
 const reducer = (state = initialState, action) => {
   switch (action.type) {
     case GET_USERS:
-        return {
+      return {
             ...state,
             users: action.payload
         }
@@ -18,13 +18,13 @@ const reducer = (state = initialState, action) => {
     case REMOVE_USER:
       return {
         ...state,
-        users: state.users.filter((user) => user.id !== action.payload),
+        users: state.users.filter((user) => user._id !== action.payload),
       }
     case UPDATE_USER:
       return {
         ...state,
         users: state.users.map((user) => {
-          if (user.id === action.payload.id) {
+          if (user._id === action.payload._id) {
             return action.payload
           }
           return user

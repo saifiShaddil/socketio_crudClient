@@ -1,11 +1,15 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
+import { connect, useDispatch } from "react-redux"
 import { Button, Form, Message, Select } from "semantic-ui-react"
+import { updateUser, addUser } from "../store/actions"
 
 const AddForm = (props) => {
+  const [message, setMessage] = useState({ show: false, text: "", color: 'green', header:"Successfully!" })
+  const dispatch = useDispatch()
   const genderOptions = [
-    { key: "m", text: "Male", value: "m" },
-    { key: "f", text: "Female", value: "f" },
-    { key: "o", text: "Do Not Disclose", value: "o" },
+    { key: "m", text: "Male", value: "Male" },
+    { key: "f", text: "Female", value: "Female" },
+    { key: "o", text: "Do Not Disclose", value: "Do Not Disclose" },
   ]
 
   const [formData, setFormData] = useState({
@@ -14,11 +18,71 @@ const AddForm = (props) => {
     age: "",
     gender: "",
   })
+  const method = props.userID ? "put" : "POST"
+
   const { fullname, email, age, gender } = formData
   const hanleSubmit = (e) => {
     e.preventDefault()
+    const body = JSON.stringify({fullname, email, age, gender})
+    if (fullname === "") return
+    if (email === "") return
+    if (age === "") return
+    if (gender === "") return
+
+    if (method === "POST") {
+      fetch(import.meta.env.VITE_APP_BASE_URL + "/users/", {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: body,
+      }).then((res) => {
+          if(!res.ok) {
+            throw new Error(res.statusText)
+          }
+          return res.json()
+        })
+        .then((result) => {
+          setMessage({...message, show: true, header: "Successfully!", color: 'green', text: "New User Added."})
+         setTimeout(() => {
+          props.onUserUpdated(result, "New")
+          dispatch(addUser(result))
+          props.setOpen(false)
+         }, 1000)
+        })
+        .catch((err) => {
+          // console.log(err)
+          setMessage({...message, show: true, text: err.message, color: 'red', header:"Error!"})
+        })
+    }
+    if (method === "put") {
+      fetch(import.meta.env.VITE_APP_BASE_URL + "/users/" + props.userID, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: body,
+      })
+        .then((res) => {
+          if(!res.ok){
+           throw new Error(res.statusText)
+          }
+          return res.json()
+        })
+        .then((result) => {
+          setMessage({...message, show: true, header: "Successfully!", color: 'green', text: "User updated successfully"})
+          setTimeout(() => {
+            props.onUserUpdated(result, "Update")
+            dispatch(updateUser(result))
+            props.setOpen(false)
+          }, 1000)
+        })
+        .catch((err) => {
+          setMessage({...message, show: true, text: err.message, color: 'red', header:"Error!"})
+        })
+
+    }
   }
-  const method = props.userID ? "put" : "post"
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -26,6 +90,21 @@ const AddForm = (props) => {
   const handleSelectChange = (e, data) => {
     setFormData({ ...formData, gender: data.value })
   }
+
+  useEffect(() => {
+    if (props.userID) {
+      let tobeUpdated = props.users.filter((user) => user._id === props.userID)
+
+      if (tobeUpdated.length > 0) {
+        setFormData({
+          fullname: tobeUpdated[0].fullname,
+          email: tobeUpdated[0].email,
+          age: tobeUpdated[0].age ?? "",
+          gender: tobeUpdated[0].gender,
+        })
+      }
+    }
+  }, [])
   return (
     <Form success onSubmit={(e) => hanleSubmit(e)}>
       <Form.Field>
@@ -36,7 +115,6 @@ const AddForm = (props) => {
           name="fullname"
           value={fullname}
           placeholder="Full Name"
-          error
         />
       </Form.Field>
       <Form.Field>
@@ -46,7 +124,6 @@ const AddForm = (props) => {
           name="email"
           value={email}
           placeholder="joe@schmoe.com"
-          error
         />
       </Form.Field>
       <Form.Field>
@@ -59,7 +136,6 @@ const AddForm = (props) => {
           name="age"
           value={age}
           placeholder="18"
-          error
         />
       </Form.Field>
       <Select
@@ -69,14 +145,22 @@ const AddForm = (props) => {
         value={gender}
         onChange={handleSelectChange}
       ></Select>
-      <Message
-        success
-        header="Updated Successfully"
-        content="You're all signed up for the newsletter"
-      />
-      <Button color={props.buttonColor}>{props.buttonSubmitTitle}</Button>
+      { message.show && (
+        <Message
+          success
+          color={message.color}
+          header={message.header}
+          content={message.text}
+        />
+      ) }
+      <Button style={{ display: "block", marginTop: '1em'}} color={props.buttonColor}>{props.buttonSubmitTitle}</Button>
     </Form>
   )
 }
 
-export default AddForm
+const mapStateToProps = (state) => {
+  return {
+    users: state.users,
+  }
+}
+export default connect(mapStateToProps)(AddForm)
